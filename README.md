@@ -19,7 +19,7 @@ FarmPro is a farmer-friendly web application designed to provide **real-time wea
 1. **Clone the repository:**
    ```sh
    git clone https://github.com/Arpit2301/FarmPro-Weather-Crop-Guide.git
-   cd FarmPro_Weather-Crop-Guide
+   cd FarmPro-Weather-Crop-Guide
    ```
 
 2. **Install dependencies:**
