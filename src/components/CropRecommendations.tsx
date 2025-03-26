@@ -1,16 +1,11 @@
 
 import React from 'react';
-
-interface Crop {
-  name: string;
-  description: string;
-  idealTemp: string;
-  idealHumidity: string;
-  image: string;
-}
+import { getCropRecommendations } from '../utils/cropUtils';
+import { WeatherData } from '../utils/weatherUtils';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 
 interface CropRecommendationsProps {
-  currentWeather: any;
+  currentWeather: WeatherData;
 }
 
 const CropRecommendations: React.FC<CropRecommendationsProps> = ({ currentWeather }) => {
@@ -22,91 +17,13 @@ const CropRecommendations: React.FC<CropRecommendationsProps> = ({ currentWeathe
     );
   }
   
-  const recommendCrops = (): Crop[] => {
-    const temp = currentWeather.main.temp;
-    const humidity = currentWeather.main.humidity;
-    const isRainy = currentWeather.weather[0].main.toLowerCase().includes('rain');
-    
-    const allCrops: Crop[] = [
-      {
-        name: 'Wheat',
-        description: 'A versatile grain crop that thrives in moderate temperatures.',
-        idealTemp: '15-24°C',
-        idealHumidity: '50-70%',
-        image: 'https://images.unsplash.com/photo-1574323347407-f5e1c5a1ec21?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80'
-      },
-      {
-        name: 'Rice',
-        description: 'A water-loving crop ideal for high humidity and rainfall.',
-        idealTemp: '20-30°C',
-        idealHumidity: '80-100%',
-        image: 'https://images.unsplash.com/photo-1559684983-d3d1d713f65a?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80'
-      },
-      {
-        name: 'Corn',
-        description: 'A warm-season crop that requires good sunlight and moderate water.',
-        idealTemp: '18-32°C',
-        idealHumidity: '60-80%',
-        image: 'https://images.unsplash.com/photo-1601591549978-c3f4b89fea02?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80'
-      },
-      {
-        name: 'Potatoes',
-        description: 'A versatile tuber that grows well in cooler temperatures.',
-        idealTemp: '15-20°C',
-        idealHumidity: '60-80%',
-        image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80'
-      },
-      {
-        name: 'Tomatoes',
-        description: 'A warm-season fruit that requires good sunlight and moderate water.',
-        idealTemp: '20-27°C',
-        idealHumidity: '50-70%',
-        image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80'
-      },
-      {
-        name: 'Lettuce',
-        description: 'A cool-season leafy vegetable ideal for mild temperatures.',
-        idealTemp: '10-22°C',
-        idealHumidity: '50-70%',
-        image: 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80'
-      },
-      {
-        name: 'Soybeans',
-        description: 'A protein-rich legume that thrives in warm conditions.',
-        idealTemp: '20-30°C',
-        idealHumidity: '60-80%',
-        image: 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80'
-      },
-      {
-        name: 'Barley',
-        description: 'A cereal grain that grows well in cool to moderate conditions.',
-        idealTemp: '12-20°C',
-        idealHumidity: '50-70%',
-        image: 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80'
-      }
-    ];
-    
-    // Simple recommendation logic based on temperature and humidity
-    return allCrops.filter(crop => {
-      const [minTemp, maxTemp] = crop.idealTemp.split('-').map(t => parseInt(t));
-      const [minHumidity, maxHumidity] = crop.idealHumidity.split('-').map(h => parseInt(h));
-      
-      const isGoodTemp = temp >= minTemp && temp <= maxTemp;
-      const isGoodHumidity = humidity >= minHumidity && humidity <= maxHumidity;
-      
-      // Special case for rice which loves rainy conditions
-      if (crop.name === 'Rice' && isRainy) return true;
-      
-      return isGoodTemp && isGoodHumidity;
-    }).slice(0, 4); // Return top 4 recommendations
-  };
-  
-  const recommendedCrops = recommendCrops();
+  // Get recommendations using the utility function
+  const recommendedCrops = getCropRecommendations(currentWeather);
   
   return (
     <section id="crops" className="py-16 px-6">
       <div className="container mx-auto">
-        <h2 className="section-title">Recommended Crops</h2>
+        <h2 className="section-title text-2xl font-bold mb-4">Recommended Crops</h2>
         <p className="text-muted-foreground max-w-2xl mb-8">
           Based on the current weather conditions in your area, here are some crops that would grow well:
         </p>
@@ -115,24 +32,48 @@ const CropRecommendations: React.FC<CropRecommendationsProps> = ({ currentWeathe
           {recommendedCrops.map((crop, index) => (
             <div 
               key={crop.name} 
-              className="crop-card flex flex-col h-full animate-entrance" 
+              className="crop-card flex flex-col h-full animate-entrance border border-border rounded-xl overflow-hidden shadow-sm" 
               style={{ animationDelay: `${0.1 + index * 0.1}s` }}
             >
-              <div 
-                className="h-48 rounded-xl mb-4 bg-cover bg-center" 
-                style={{ backgroundImage: `url(${crop.image})` }}
-              ></div>
-              <h3 className="text-xl font-semibold mb-2">{crop.name}</h3>
-              <p className="text-muted-foreground text-sm mb-4">{crop.description}</p>
-              <div className="mt-auto grid grid-cols-2 gap-2 text-sm">
-                <div className="p-2 rounded-lg bg-secondary/50">
-                  <p className="text-xs text-muted-foreground">Ideal Temp</p>
-                  <p className="font-medium">{crop.idealTemp}</p>
+              <div className="p-4 flex-grow">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xl font-semibold">{crop.name}</h3>
+                  <div className="px-2 py-1 bg-farm-green/10 text-farm-green rounded-full text-sm font-medium">
+                    {crop.confidence}% match
+                  </div>
                 </div>
-                <div className="p-2 rounded-lg bg-secondary/50">
-                  <p className="text-xs text-muted-foreground">Ideal Humidity</p>
-                  <p className="font-medium">{crop.idealHumidity}</p>
+                <p className="text-muted-foreground text-sm mb-4">{crop.description}</p>
+                
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium mb-2">Ideal Growing Conditions:</h4>
+                  <Table className="w-full">
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="py-1 text-xs font-medium">Temperature:</TableCell>
+                        <TableCell className="py-1 text-xs">{crop.idealConditions.temperature}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="py-1 text-xs font-medium">Humidity:</TableCell>
+                        <TableCell className="py-1 text-xs">{crop.idealConditions.humidity}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="py-1 text-xs font-medium">Rainfall:</TableCell>
+                        <TableCell className="py-1 text-xs">{crop.idealConditions.rainfall}</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
                 </div>
+                
+                {crop.tips.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium mb-2">Growing Tips:</h4>
+                    <ul className="list-disc pl-5 text-xs text-muted-foreground">
+                      {crop.tips.slice(0, 2).map((tip, i) => (
+                        <li key={i} className="mb-1">{tip}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
           ))}
